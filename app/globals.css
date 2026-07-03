@@ -1,0 +1,809 @@
+:root {
+  --bg: #000000;
+  --panel: #000000;
+  --panel-2: #000000;
+  --text: #ffffff;
+  --muted: #ffffff;
+  --accent: #ffffff;
+  --color-ok: #4cc38a;
+  --color-warn: #ffd166;
+  --color-error: #ff7b72;
+  --color-accent: #b692ff;
+  --idle: #ffffff;
+  --border: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.mermaid-wrap {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  overflow-x: auto;
+}
+
+.legend li {
+  margin-bottom: 8px;
+}
+
+/* ── Architecture system map ─────────────────────────────────────────── */
+.arch-wide {
+  max-width: 1320px;
+}
+
+.arch-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.arch-head-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.live-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+.live-tag .live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.live-tag.on .live-dot {
+  background: var(--color-ok);
+  animation: live-pulse 1.4s ease-in-out infinite;
+}
+.live-tag.off {
+  color: var(--muted);
+  opacity: 0.85;
+}
+.live-tag.off .live-dot {
+  background: transparent;
+  border: 1px solid var(--muted);
+}
+@keyframes live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(76, 195, 138, 0.6); }
+  50% { box-shadow: 0 0 0 5px rgba(76, 195, 138, 0); }
+}
+
+/* Friendly "connect your repo" banner — shown when no backend is connected.
+   Informational, not an error: neutral B&W styling, no red. */
+.connect-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  border-style: dashed;
+}
+.connect-banner-icon {
+  font-size: 26px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.connect-banner-body h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+.connect-banner-body p {
+  margin: 0 0 6px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.connect-banner-body p:last-child {
+  margin-bottom: 0;
+}
+.connect-banner-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.connect-banner-hint {
+  opacity: 0.8;
+}
+
+.arch-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--panel-2);
+}
+
+.arch-toggle button {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.arch-toggle button.on {
+  background: var(--accent);
+  color: #06122e;
+}
+
+.arch-toggle.small button {
+  padding: 5px 11px;
+  font-size: 11px;
+}
+
+.heat-ramp {
+  display: inline-block;
+  width: 56px;
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    rgb(78, 161, 255),
+    rgb(76, 195, 138),
+    rgb(255, 209, 102),
+    rgb(255, 92, 82)
+  );
+}
+
+.arch-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.arch-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.arch-legend .sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  padding: 0;
+}
+
+.dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+.dot.ok { background: var(--color-ok); }
+.dot.risk { background: var(--color-warn); }
+.dot.down { background: var(--color-error); }
+
+.edge-key {
+  width: 22px;
+  height: 0;
+  border-top-width: 3px;
+  border-top-style: solid;
+  display: inline-block;
+}
+.edge-key.flow { border-color: var(--accent); }
+.edge-key.dep { border-top-style: dashed; border-color: var(--muted); }
+
+.arch-stage-wrap {
+  position: relative;
+}
+.arch-canvas {
+  background:
+    radial-gradient(
+        circle,
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 1.4px
+      )
+      0 0 / 26px 26px,
+    var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  height: 72vh;
+  min-height: 460px;
+  overflow: auto;
+  cursor: grab;
+  overscroll-behavior: contain;
+  margin-bottom: 16px;
+}
+.arch-canvas.panning {
+  cursor: grabbing;
+}
+.arch-canvas.panning * {
+  user-select: none;
+}
+.arch-stage {
+  position: relative;
+}
+
+.arch-zoom {
+  position: absolute;
+  right: 18px;
+  bottom: 30px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: rgba(20, 20, 22, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+.arch-zoom button {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.arch-zoom button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.arch-zoom button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.arch-zoom button:disabled:hover {
+  background: transparent;
+}
+.arch-zoom .arch-zoom-reset {
+  font-size: 12px;
+  color: var(--muted);
+}
+.arch-zoom-sep {
+  width: 1px;
+  align-self: stretch;
+  margin: 2px 2px;
+  background: var(--border);
+}
+.arch-zoom-val {
+  min-width: 44px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.arch-inner {
+  position: relative;
+  display: flex;
+  gap: 84px;
+  padding: 90px 160px 110px;
+  min-width: max-content;
+}
+
+.arch-heatfield {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+  mix-blend-mode: screen;
+  transition: opacity 0.3s ease;
+}
+
+.arch-edges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.2s ease;
+}
+.edge {
+  fill: none;
+}
+.edge.flow {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+  transition: stroke 0.4s ease, stroke-width 0.4s ease;
+}
+.edge.flow.idle {
+  stroke-dasharray: 3 6;
+  opacity: 0.55;
+}
+.edge.flow.hot {
+  animation: edge-flow 1s linear infinite;
+  stroke-dasharray: 9 6;
+}
+@keyframes edge-flow {
+  to {
+    stroke-dashoffset: -30;
+  }
+}
+.edge.dep {
+  stroke: var(--muted);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 5;
+}
+
+/* Invisible wide overlay that makes thin arrows easy to hover for tooltips */
+.edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 16;
+  pointer-events: stroke;
+  cursor: help;
+}
+
+.edge-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-anchor: middle;
+  font-family: ui-monospace, Menlo, monospace;
+  paint-order: stroke;
+  stroke: #000;
+  stroke-width: 3px;
+}
+
+.step-badge {
+  fill: #0b1020;
+  stroke: var(--accent);
+  stroke-width: 1.5;
+}
+.step-num {
+  fill: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  text-anchor: middle;
+  font-family: ui-monospace, Menlo, monospace;
+}
+
+.arch-col {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  align-items: center;
+}
+
+.arch-col-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.arch-col-head h3 {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text);
+}
+.arch-col-head span {
+  font-size: 11px;
+}
+
+.node {
+  position: relative;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 10px;
+  padding: 11px 13px;
+  cursor: grab;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+  outline: none;
+}
+.arch-canvas.panning .node {
+  cursor: grabbing;
+}
+.node.ok { border-left-color: var(--color-ok); }
+.node.risk { border-left-color: var(--color-warn); }
+.node.down {
+  border-left-color: var(--color-error);
+  box-shadow: 0 0 0 1px rgba(255, 123, 114, 0.35);
+}
+.node:hover,
+.node.active {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent);
+}
+.node.dim {
+  opacity: 0.28;
+}
+
+.node-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.node-kind {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--muted);
+}
+.node-label {
+  font-weight: 700;
+  font-size: 13px;
+  font-family: ui-monospace, Menlo, monospace;
+  word-break: break-word;
+}
+.node-file {
+  font-size: 10.5px;
+  color: var(--muted);
+  font-family: ui-monospace, Menlo, monospace;
+  margin-top: 2px;
+  word-break: break-all;
+}
+
+.arch-detail {
+  min-height: 150px;
+  border-left: 4px solid var(--border);
+}
+.arch-detail.ok { border-left-color: var(--color-ok); }
+.arch-detail.risk { border-left-color: var(--color-warn); }
+.arch-detail.down { border-left-color: var(--color-error); }
+.arch-detail.empty { border-left-color: var(--accent); }
+
+.arch-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-pill {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.status-pill.ok { background: var(--color-ok); color: #06210f; }
+.status-pill.risk { background: var(--color-warn); color: #2a1f00; }
+.status-pill.down { background: var(--color-error); color: #2a0a07; }
+
+/* Floating card tooltip — cursor-following mirror of the bottom DetailPanel. */
+.node-tip {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 60;
+  max-width: 340px;
+  padding: 11px 13px;
+  background: rgba(15, 17, 21, 0.97);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 9px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  backdrop-filter: blur(4px);
+}
+.node-tip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.node-tip.ok { border-left-color: var(--color-ok); }
+.node-tip.risk { border-left-color: var(--color-warn); }
+.node-tip.down { border-left-color: var(--color-error); }
+.node-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.node-tip-head strong {
+  font-size: 13px;
+  font-family: ui-monospace, Menlo, monospace;
+}
+.node-tip .arch-dl {
+  grid-template-columns: 108px 1fr;
+  gap: 5px 12px;
+  font-size: 12px;
+}
+
+.arch-dl {
+  margin: 14px 0 0;
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 8px 16px;
+  font-size: 13px;
+}
+.arch-dl dt {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding-top: 1px;
+}
+.arch-dl dd {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .arch-dl {
+    grid-template-columns: 1fr;
+    gap: 2px 0;
+  }
+  .arch-dl dt {
+    margin-top: 8px;
+  }
+}
+
+/* ── Live bottom row: detail + busiest routes ───────────────────────── */
+.arch-bottom {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.arch-routes h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.route-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.route-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.route-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.route-name {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.route-val {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: ui-monospace, Menlo, monospace;
+  white-space: nowrap;
+}
+.route-list li.err .route-val {
+  color: var(--color-error);
+}
+.route-bar {
+  height: 7px;
+  background: #000;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+.route-bar > span {
+  display: block;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+/* ── Mermaid diagram tab — clean high-contrast black & white ────────── */
+.mermaid-panel {
+  overflow: auto;
+  min-height: 520px;
+  background: #000;
+  padding: 8px;
+}
+
+.mermaid-view {
+  display: flex;
+  justify-content: center;
+  padding: 24px 8px;
+}
+.mermaid-view svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Cursor-following magnifier (loupe) showing the same diagram enlarged */
+.mermaid-wrap {
+  position: relative;
+  cursor: zoom-in;
+  /* The generic .mermaid-wrap rule sets a white background; the diagram tab is
+     strictly black, so keep this wrapper transparent to show the black panel. */
+  background: transparent;
+  padding: 0;
+}
+.mermaid-lens {
+  position: fixed;
+  z-index: 70;
+  overflow: hidden;
+  background: #000;
+  border: 1.5px solid #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+.mermaid-lens-inner {
+  padding: 0 !important;
+  display: block !important;
+  transform-origin: 0 0;
+}
+.mermaid-lens-inner svg {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+}
+
+/* Crisp, clearly bordered node boxes with a soft lift for separation */
+.mermaid-view svg .node rect,
+.mermaid-view svg .node polygon,
+.mermaid-view svg .node circle,
+.mermaid-view svg .node path {
+  stroke: #ffffff !important;
+  stroke-width: 2px !important;
+  rx: 8px;
+  ry: 8px;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.75));
+  transition: filter 0.15s ease;
+}
+.mermaid-view svg .node:hover rect,
+.mermaid-view svg .node:hover polygon,
+.mermaid-view svg .node:hover circle {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.9));
+}
+
+/* Readable node text — wrap long labels so they stay inside the box */
+.mermaid-view svg .node .nodeLabel,
+.mermaid-view svg .node text {
+  font-size: 23px !important;
+  font-weight: 600 !important;
+}
+.mermaid-view svg .node .nodeLabel,
+.mermaid-view svg .node foreignObject div,
+.mermaid-view svg .node foreignObject span,
+.mermaid-view svg .node foreignObject p {
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  text-align: center;
+}
+
+/* Swimlane cluster: clear dashed frame + label, no fill clutter */
+.mermaid-view svg .cluster rect {
+  stroke: #ffffff !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 5 4 !important;
+  fill: rgba(255, 255, 255, 0.03) !important;
+  rx: 10px;
+  ry: 10px;
+}
+.mermaid-view svg .cluster .cluster-label,
+.mermaid-view svg .cluster text {
+  fill: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+}
+
+/* Edges: give flow vs dependency a clear visual hierarchy.
+   Mermaid tags each link with edge-thickness-* / edge-pattern-* classes. */
+.mermaid-view svg .edgePath path,
+.mermaid-view svg .flowchart-link {
+  stroke: #ffffff;
+}
+/* Runtime flow (==>) — clear but thin, solid */
+.mermaid-view svg .flowchart-link.edge-thickness-thick {
+  stroke: #ffffff !important;
+  stroke-width: 1.4px !important;
+}
+/* Structural dependency (-.->) — extra thin, dim, dashed */
+.mermaid-view svg .flowchart-link.edge-pattern-dotted,
+.mermaid-view svg .flowchart-link.edge-pattern-dashed {
+  stroke: #8a8a8a !important;
+  stroke-width: 1px !important;
+  stroke-dasharray: 4 5 !important;
+}
+.mermaid-view svg marker {
+  transform: scale(0.7);
+}
+.mermaid-view svg marker path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+/* Invisible layout-ordering links (~~~) must never be drawn */
+.mermaid-view svg .flowchart-link.edge-thickness-invisible {
+  stroke-width: 0 !important;
+  opacity: 0 !important;
+}
+
+/* Edge labels: legible chip on black */
+.mermaid-view svg .edgeLabel,
+.mermaid-view svg .edgeLabel p {
+  background: #000 !important;
+  color: #ffffff !important;
+  fill: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  border-radius: 5px;
+}
+.mermaid-view svg .edgeLabel rect {
+  fill: #000 !important;
+  opacity: 0.9 !important;
+}

@@ -1,0 +1,41 @@
+{
+  "name": "codexray",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CodeXray — independent developer tool: live code architecture & telemetry visualiser. Reads /metrics and /logs from any instrumented backend.",
+  "license": "MIT",
+  "author": "Amit Bhardwaj",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amitfounderspace/CodeXray"
+  },
+  "keywords": [
+    "architecture",
+    "visualization",
+    "dashboard",
+    "observability",
+    "nextjs",
+    "developer-tools"
+  ],
+  "scripts": {
+    "prestart": "npm install",
+    "start": "next dev -p 3001",
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "serve": "next start -p 3001",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@mermaid-js/layout-elk": "^0.1.7",
+    "mermaid": "^11.6.0",
+    "next": "14.2.18",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.10",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
+    "typescript": "5.7.2"
+  }
+}

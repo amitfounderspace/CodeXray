@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeXray — Live Code Architecture Visualiser</title>
+  <meta name="description" content="CodeXray turns any codebase into a live system map. Cards are real source files, edges are measured runtime traffic, colours are live health. Standalone. Open source. Zero lock-in." />
+  <meta property="og:title" content="CodeXray — Live Code Architecture Visualiser" />
+  <meta property="og:description" content="See your code end-to-end, as it really behaves — not just how it's written." />
+  <meta property="og:type" content="website" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #000000;
+      --surface:  #0d0d0d;
+      --border:   #1f1f1f;
+      --text:     #f0f0f0;
+      --muted:    #888;
+      --green:    #4cc38a;
+      --yellow:   #ffd166;
+      --red:      #ff5c52;
+      --blue:     #4ea1ff;
+      --purple:   #b692ff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+    }
+
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    .nav-logo span { color: var(--blue); }
+    .nav-links { display: flex; gap: 1.5rem; font-size: 0.875rem; color: var(--muted); }
+    .nav-links a { color: var(--muted); }
+    .nav-links a:hover { color: var(--text); text-decoration: none; }
+    .nav-cta {
+      background: var(--blue); color: #000; font-weight: 600;
+      font-size: 0.8rem; padding: 0.4rem 1rem; border-radius: 6px;
+      transition: opacity 0.15s;
+    }
+    .nav-cta:hover { opacity: 0.85; text-decoration: none; }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 7rem 1.5rem 5rem;
+      max-width: 780px; margin: 0 auto;
+    }
+    .hero-badge {
+      display: inline-block; margin-bottom: 1.5rem;
+      background: #0f1f0f; border: 1px solid #2a4a2a; color: var(--green);
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+      padding: 0.3rem 0.85rem; border-radius: 999px; text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 6vw, 3.8rem);
+      font-weight: 800; letter-spacing: -0.04em; line-height: 1.1;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted); max-width: 560px; margin: 0 auto 2.5rem;
+    }
+    .hero-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--blue); color: #000; font-weight: 700;
+      font-size: 0.95rem; padding: 0.7rem 1.6rem; border-radius: 8px;
+      transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.85; text-decoration: none; }
+    .btn-secondary {
+      background: var(--surface); color: var(--text); font-weight: 600;
+      font-size: 0.95rem; padding: 0.7rem 1.6rem; border-radius: 8px;
+      border: 1px solid var(--border); transition: border-color 0.15s;
+    }
+    .btn-secondary:hover { border-color: #444; text-decoration: none; }
+
+    /* ── DEMO CARD ── */
+    .demo-wrap {
+      max-width: 900px; margin: 0 auto 5rem;
+      padding: 0 1.5rem;
+    }
+    .demo-board {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem 1.5rem 1.5rem;
+      overflow-x: auto;
+    }
+    .demo-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      margin-bottom: 1.5rem; font-size: 0.78rem; color: var(--muted);
+    }
+    .pill {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem; border-radius: 999px;
+    }
+    .pill-live   { background: #0a1f0a; color: var(--green); border: 1px solid #1a3a1a; }
+    .pill-off    { background: #1a1a1a; color: var(--muted);  border: 1px solid #2a2a2a; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .lanes { display: flex; gap: 1rem; min-width: 560px; }
+    .lane { flex: 1; }
+    .lane-title {
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 0.75rem; padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .card {
+      background: #111; border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.65rem 0.75rem;
+      margin-bottom: 0.6rem; font-size: 0.78rem;
+    }
+    .card-label { font-weight: 700; margin-bottom: 0.15rem; }
+    .card-kind  { color: var(--muted); font-size: 0.68rem; }
+    .card.ok    { border-left: 3px solid var(--green); }
+    .card.risk  { border-left: 3px solid var(--yellow); }
+    .card.hot   { border-left: 3px solid var(--red); box-shadow: 0 0 12px rgba(255,92,82,0.2); }
+    .card.blue  { border-left: 3px solid var(--blue); }
+
+    /* ── FEATURES ── */
+    section { max-width: 900px; margin: 0 auto; padding: 4rem 1.5rem; }
+    .section-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.2;
+      margin-bottom: 3rem;
+    }
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; }
+    .feature {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 1.4rem 1.25rem;
+    }
+    .feature-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .feature h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .feature p  { font-size: 0.83rem; color: var(--muted); line-height: 1.55; }
+
+    /* ── HOW IT WORKS ── */
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step  { display: flex; gap: 1.25rem; padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      flex-shrink: 0; width: 32px; height: 32px;
+      border-radius: 50%; background: var(--surface); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 800; color: var(--blue);
+    }
+    .step-body h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .step-body p  { font-size: 0.83rem; color: var(--muted); }
+
+    /* ── INSTALL ── */
+    .install-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 2rem;
+    }
+    pre {
+      background: #0a0a0a; border: 1px solid var(--border);
+      border-radius: 8px; padding: 1rem 1.25rem;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.82rem; color: var(--green);
+      overflow-x: auto; margin: 1rem 0 0;
+    }
+    .install-note { font-size: 0.8rem; color: var(--muted); margin-top: 0.75rem; }
+    .install-note a { color: var(--blue); }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 2.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--text); }
+
+    /* ── DIVIDER ── */
+    hr { border: none; border-top: 1px solid var(--border); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .demo-board { padding: 1.25rem 1rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">Code<span>Xray</span></span>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#how-it-works">How it works</a>
+    <a href="#install">Install</a>
+  </div>
+  <a class="nav-cta" href="https://github.com/amitfounderspace/CodeXray">View on GitHub →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-badge">Open source · MIT · No lock-in</span>
+  <h1>See your code<br /><em>as it really runs</em></h1>
+  <p>
+    CodeXray turns any codebase into a live system map —
+    cards are real source files, edges are measured runtime traffic,
+    colours are live health. Standalone. Zero config.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="https://github.com/amitfounderspace/CodeXray">Get started free →</a>
+    <a class="btn-secondary" href="#how-it-works">See how it works</a>
+  </div>
+</div>
+
+<!-- DEMO BOARD (static illustration) -->
+<div class="demo-wrap">
+  <div class="demo-board">
+    <div class="demo-header">
+      <span>localhost:3001</span>
+      <span class="pill pill-live"><span class="dot"></span>LIVE</span>
+      <span style="margin-left:auto; color:#555; font-size:0.7rem">last update 0.3s ago</span>
+    </div>
+    <div class="lanes">
+      <div class="lane">
+        <div class="lane-title">Browser UI</div>
+        <div class="card ok">
+          <div class="card-label">App.tsx</div>
+          <div class="card-kind">React root</div>
+        </div>
+        <div class="card hot">
+          <div class="card-label">pages/</div>
+          <div class="card-kind">React pages · 47 req/s 🔥</div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lane-title">API Server</div>
+        <div class="card ok">
+          <div class="card-label">server.ts</div>
+          <div class="card-kind">Express app</div>
+        </div>
+        <div class="card ok">
+          <div class="card-label">routes.ts</div>
+          <div class="card-kind">Express router</div>
+        </div>
+        <div class="card blue">
+          <div class="card-label">apiClient.ts</div>
+          <div class="card-kind">HTTP client</div>
+        </div>
+      </div>
+      <div class="lane">
+        <div class="lane-title">Data Layer</div>
+        <div class="card ok">
+          <div class="card-label">model.ts</div>
+          <div class="card-kind">Data model</div>
+        </div>
+        <div class="card risk">
+          <div class="card-label">db.ts</div>
+          <div class="card-kind">DB connection · slow ⚠</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">What you get</div>
+  <div class="section-title">Everything you need to understand<br />a codebase at a glance</div>
+  <div class="features">
+    <div class="feature">
+      <div class="feature-icon">🗺️</div>
+      <h3>Ground-truth architecture map</h3>
+      <p>Cards are <em>real source files</em>, sized by importance. Edges are actual imports and runtime call paths — not guesses.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔥</div>
+      <h3>Live traffic heat map</h3>
+      <p>Polls <code>/metrics</code> every second. Hot paths glow red, cold ones stay cool. See exactly which parts are doing the heavy lifting.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🟢</div>
+      <h3>Per-block health status</h3>
+      <p>Green · Orange · Red — with a plain-English reason why, updated live from your running app.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔢</div>
+      <h3>Numbered data flow</h3>
+      <p>Switch to Flow view to trace the runtime journey step by step: UI → API → model → database, in the order it actually fires.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📡</div>
+      <h3>Always offline-safe</h3>
+      <p>Static map renders immediately. Live heat only activates when your backend is running — it never errors or blocks.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🤖</div>
+      <h3>Zero-setup AI onboarding</h3>
+      <p>Open the repo in VS Code, ask the AI assistant <em>"set up CodeXray"</em> — it explores your codebase and wires everything automatically.</p>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<!-- HOW IT WORKS -->
+<section id="how-it-works">
+  <div class="section-label">How it works</div>
+  <div class="section-title">Three pieces. Total transparency.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Describe your project in a config</h3>
+        <p>Copy <code>app/configs/example.ts</code>, list your real source files as blocks with their roles and imports, and register it. The AI assistant can generate this for you in one prompt.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Expose two read-only endpoints on your backend</h3>
+        <p><code>GET /metrics</code> returns live edge counts, byte totals, and per-block health. <code>GET /logs</code> streams recent log lines. Both are in-memory only — no database required.</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>Open the dashboard</h3>
+        <p>Run <code>npm start</code> in the CodeXray folder. Open <code>localhost:3001/?project=yourapp</code>. The map renders instantly; traffic lights up as your app runs.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<!-- INSTALL -->
+<section id="install">
+  <div class="section-label">Quick start</div>
+  <div class="section-title">Running in under a minute</div>
+  <div class="install-block">
+    <p style="font-size:0.9rem; color:var(--muted);">Clone alongside your project and start the dashboard:</p>
+    <pre>git clone https://github.com/amitfounderspace/CodeXray.git
+cd CodeXray
+npm start</pre>
+    <p class="install-note">
+      Requires <a href="https://nodejs.org" target="_blank" rel="noopener">Node.js LTS</a>.
+      Then open <strong>localhost:3001</strong> in your browser.
+      Not a developer? Double-click <code>start.command</code> — it handles everything.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>
+    <a href="https://github.com/amitfounderspace/CodeXray" target="_blank" rel="noopener">GitHub</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/amitfounderspace/CodeXray/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+    &nbsp;·&nbsp;
+    <a href="https://github.com/amitfounderspace/CodeXray/blob/main/README.md" target="_blank" rel="noopener">Docs</a>
+  </p>
+  <p style="margin-top:0.5rem;">CodeXray — open source, no lock-in, runs entirely on your machine.</p>
+</footer>
+
+</body>
+</html>
