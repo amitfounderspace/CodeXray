@@ -1,9 +1,8 @@
 # CodeXray
 
-An **independent developer tool** that visualises a codebase as a live system
-map — cards are real source files, edges are measured runtime data flow, and the
-colour is live traffic/health. It is a standalone Next.js app (a "plug-in" you
-point at any instrumented backend).
+As a vibe coder, do you actually know what your AI agent just wrote into your codebase? One prompt turns into ten files — and suddenly you're not building, you're guessing.
+
+CodeXray turns your codebase into a live, interactive code map — every file, module, and connection laid out at a glance. Follow the data flow step by step, watch a real-time traffic heat map show you what's actually running hot, and see every component color-coded 🟢 working / 🟠 at risk / 🔴 broken — live.
 
 ## How it works
 
