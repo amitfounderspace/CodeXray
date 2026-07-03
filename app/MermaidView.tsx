@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { BlockStatus, ProjectMap } from "./schema";
+import type { Block, BlockStatus, ProjectMap } from "./schema";
 
 // Status shown by SHADE (not hue) so the diagram stays strictly black & white.
 const STATUS_FILL: Record<BlockStatus, string> = {
